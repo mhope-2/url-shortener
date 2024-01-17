@@ -1,0 +1,39 @@
+version: '3.7'
+
+services:
+
+  url_shortener:
+    build:
+      dockerfile: ./Dockerfile
+      context: .
+      args:
+        PORT: ${PORT}
+    container_name: url-shortener
+    ports:
+      - "8085:${PORT}"
+    networks:
+      - shortnet
+    env_file: .env
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+    container_name: url-shortener-db
+    ports:
+      - "27017:${MONGO_PORT}"
+    networks:
+      - shortnet
+    environment:
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASS: ${MONGO_PASS}
+    env_file: .env
+
+#  redis:
+#    image: redis:5.0.10-alpine
+#    container_name: postmates-redis
+#    ports:
+#      - "6379:6379"
+
+networks:
+  shortnet:
