@@ -2,13 +2,14 @@ package redis
 
 import (
 	"github.com/go-redis/redis"
+	"log"
 )
 
 type Config struct {
 	Addr     string
 	Password string
-	//DB       int
-	//DBurl    string
+	DB       int
+	DBurl    string
 }
 
 func New(config *Config) *redis.Client {
@@ -22,8 +23,18 @@ func New(config *Config) *redis.Client {
 	//	})
 	//}
 
-	return redis.NewClient(&redis.Options{
+	client := redis.NewClient(&redis.Options{
 		Addr:     config.Addr,
 		Password: config.Password,
+		DB:       config.DB,
 	})
+
+	_, err := client.Ping().Result()
+	if err != nil {
+		log.Printf("Error pinging Redis server: %v", err)
+	}
+
+	log.Println("Connected to Redis server!")
+
+	return client
 }

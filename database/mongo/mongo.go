@@ -2,25 +2,25 @@ package mongo
 
 import (
 	"context"
-	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
-	"log"
-	"os"
-
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
+	"os"
 )
 
 // Client func
 func Client() *mongo.Client {
 
-	mongodbURI := fmt.Sprintf("%s", os.Getenv("MONGODB_URI"))
-
+	mongodbURI := os.Getenv("MONGODB_URI")
 	if mongodbURI == "" {
 		log.Fatal("MONGODB_URI environment variable is not set.")
 	}
 
 	opts := options.Client().ApplyURI(mongodbURI)
+
+	//ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	//defer cancel()
 
 	client, err := mongo.Connect(context.TODO(), opts)
 
@@ -40,8 +40,8 @@ func Client() *mongo.Client {
 	return client
 }
 
-// OpenCollection is a  function makes a connection with a collection in the database
-func OpenCollection(client *mongo.Client, collectionName string) *mongo.Collection {
+// GetCollection is a  function makes a connection with a collection in the database
+func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
 
 	var collection *mongo.Collection = client.Database(os.Getenv("MONGODB_NAME")).Collection(collectionName)
 

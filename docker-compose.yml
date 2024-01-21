@@ -1,8 +1,7 @@
 version: '3.7'
 
 services:
-
-  url_shortener:
+  url-shortener:
     build:
       dockerfile: ./Dockerfile
       context: .
@@ -16,6 +15,7 @@ services:
     env_file: .env
     depends_on:
       - mongodb
+      - redis
 
   mongodb:
     image: mongo:latest
@@ -29,11 +29,16 @@ services:
       MONGO_PASS: ${MONGO_PASS}
     env_file: .env
 
-#  redis:
-#    image: redis:5.0.10-alpine
-#    container_name: postmates-redis
-#    ports:
-#      - "6379:6379"
+  redis:
+    image: redis:7.2.4-alpine
+    container_name: url-shortener-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - shortnet
+    environment:
+      REDIS_ADDRESS: ${REDIS_ADDRESS}
+    env_file: .env
 
 networks:
   shortnet:
