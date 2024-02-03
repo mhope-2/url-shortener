@@ -94,7 +94,7 @@ func (r *Repository) GetUrl(slug string, clientIP string) (*models.Url, error) {
 	return &url, nil
 }
 
-// TODO: Add client ip to cache key
+// CacheUrl caches the given url
 func (r *Repository) CacheUrl(url *shared.Url, clientIP string) error {
 	stringifiedUrl, err := json.Marshal(url)
 	if err != nil {

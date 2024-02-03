@@ -13,8 +13,8 @@ import (
 func main() {
 
 	r := redis.New(&redis.Config{
-		Addr:     fmt.Sprintf("%s", os.Getenv("REDIS_ADDRESS")),
-		Password: fmt.Sprintf("%s", os.Getenv("REDIS_PASSWORD")),
+		Addr:     os.Getenv("REDIS_ADDRESS"),
+		Password: os.Getenv("REDIS_PASSWORD"),
 		DB:       0,
 	})
 

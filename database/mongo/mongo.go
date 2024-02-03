@@ -42,8 +42,12 @@ func Client() *mongo.Client {
 
 // GetCollection is a  function makes a connection with a collection in the database
 func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
+	mongodbName := os.Getenv("MONGODB_NAME")
+	if mongodbName == "" {
+		log.Fatal("MONGODB_NAME environment variable is not set.")
+	}
 
-	var collection *mongo.Collection = client.Database(os.Getenv("MONGODB_NAME")).Collection(collectionName)
+	var collection *mongo.Collection = client.Database(mongodbName).Collection(collectionName)
 
 	return collection
 }
