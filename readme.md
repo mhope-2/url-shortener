@@ -1,6 +1,6 @@
 # URL Shortening Service
 
-A URL Shortening service built in go using the go-gin framework.
+A URL Shortening service built in go using the go-gin framework and MongoDB as the database.
 
 ## Getting Started
 
