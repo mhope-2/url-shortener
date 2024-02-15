@@ -77,5 +77,4 @@ func createShortLink(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Errorf("Expected status code %v, got %v", http.StatusOK, w.Code)
 	}
-	fmt.Println("BODY: ", w.Body)
 }
