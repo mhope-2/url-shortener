@@ -7,25 +7,39 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"os"
+	"time"
 )
 
-// Client func
-func Client() *mongo.Client {
+type Config struct {
+	MongodbURI  string
+	MongodbName string
+}
 
-	mongodbURI := os.Getenv("MONGODB_URI")
+func New(config *Config) (*mongo.Database, error) {
+
+	var mongodbURI string
+
+	if os.Getenv("ENV") == "testing" {
+		mongodbURI = os.Getenv("TEST_MONGODB_URI")
+	} else {
+		mongodbURI = os.Getenv("MONGODB_URI")
+	}
+
+	//mongodbURI := os.Getenv("MONGODB_URI")
 	if mongodbURI == "" {
 		log.Fatal("MONGODB_URI environment variable is not set.")
 	}
 
-	opts := options.Client().ApplyURI(mongodbURI)
+	opts := options.Client().ApplyURI(config.MongodbURI)
 
-	//ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-	//defer cancel()
+	// set context with timeout for mongodb connection
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
 
-	client, err := mongo.Connect(context.TODO(), opts)
+	client, err := mongo.Connect(ctx, opts)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	// Send a ping to confirm a successful connection
@@ -35,19 +49,9 @@ func Client() *mongo.Client {
 		panic(err)
 	}
 
+	database := client.Database(config.MongodbName)
+
 	log.Println("Connected to MongoDB!")
 
-	return client
-}
-
-// GetCollection is a  function makes a connection with a collection in the database
-func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
-	mongodbName := os.Getenv("MONGODB_NAME")
-	if mongodbName == "" {
-		log.Fatal("MONGODB_NAME environment variable is not set.")
-	}
-
-	var collection *mongo.Collection = client.Database(mongodbName).Collection(collectionName)
-
-	return collection
+	return database, nil
 }

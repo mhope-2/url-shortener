@@ -14,8 +14,8 @@ RUN go mod download
 RUN go build -o url-shortner
 
 # Run the tests in the container
-#FROM build-stage AS run-test-stage
-#RUN go test -v ./...
+FROM build-stage AS run-test-stage
+RUN go test -v ./...
 
 FROM alpine
 

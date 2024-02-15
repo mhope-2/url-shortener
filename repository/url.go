@@ -12,23 +12,29 @@ import (
 	"time"
 
 	"github.com/mhope-2/url_shortener/database/models"
-	localmongo "github.com/mhope-2/url_shortener/database/mongo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var (
-	collection                      = "url"
-	urlCollection *mongo.Collection = localmongo.GetCollection(localmongo.Client(), collection)
-)
+type UrlRepository interface {
+	CreateUrl(originalUrl string, slug string, clientIP string) (*models.Url, error)
+	GetUrl(slug string, clientIP string) (*models.Url, error)
+	CacheUrl(url *shared.Url, clientIP string) error
+	GetUrlFromCache(cacheKey string, clientIP string) (*shared.Url, error)
+	GenerateRandomNumber(min, max int) int
+	GenerateSlug(url string, min, max int) string
+}
+
+var collection = "url"
 
 // CreateUrl creates a url object, stores it in the db and the caches it
 func (r *Repository) CreateUrl(originalUrl string, slug string, clientIP string) (*models.Url, error) {
 
+	urlCollection := r.DB.Collection(collection)
+
 	var url models.Url
 
-	// check if the slug already exists
 	existingUrl, err := r.GetUrl(slug, clientIP)
 
 	if err != nil {
@@ -36,7 +42,6 @@ func (r *Repository) CreateUrl(originalUrl string, slug string, clientIP string)
 	}
 
 	if existingUrl != nil {
-		// a URL with the given slug already exists
 		return existingUrl, nil
 	}
 
@@ -51,7 +56,6 @@ func (r *Repository) CreateUrl(originalUrl string, slug string, clientIP string)
 		return nil, err
 	}
 
-	// Cache the url
 	if err = r.CacheUrl(&shared.Url{Url: url.Url, Slug: url.Slug}, clientIP); err != nil {
 		return nil, err
 	}
@@ -61,6 +65,8 @@ func (r *Repository) CreateUrl(originalUrl string, slug string, clientIP string)
 
 // GetUrl returns matching url objects for the given slug
 func (r *Repository) GetUrl(slug string, clientIP string) (*models.Url, error) {
+
+	urlCollection := r.DB.Collection(collection)
 
 	// Attempt to get the URL from the cache
 	cachedUrl, err := r.GetUrlFromCache(slug, clientIP)
@@ -101,11 +107,9 @@ func (r *Repository) CacheUrl(url *shared.Url, clientIP string) error {
 		return err
 	}
 
-	// set slug cache key
 	key := fmt.Sprintf("%s-%s", url.Slug, clientIP)
 	_, err = r.Cache.Set(key, stringifiedUrl, 0).Result()
 
-	// set original url cache key
 	key = fmt.Sprintf("%s-%s", url.Url, clientIP)
 	_, err = r.Cache.Set(key, stringifiedUrl, 0).Result()
 
@@ -141,14 +145,15 @@ func (r *Repository) GenerateRandomNumber(min, max int) int {
 }
 
 // GenerateSlug returns as a string, an encoded form of the given url + timestamp + a pseudo-random number
-// TODO: Review this approach to scale, i.e. reduce rate of possible collisions
+// TODO: Review this approach to scale, i.e. reduce frequency of possible collisions
 func (r *Repository) GenerateSlug(url string, min, max int) string {
+
+	urlCollection := r.DB.Collection("url")
+
 	var existingURL models.Url
 
 	uniqueStr := fmt.Sprintf("%s+%d+%d", url, r.GenerateRandomNumber(min, max), time.Now().Unix())
-
 	encodedStr := base64.RawURLEncoding.EncodeToString([]byte(uniqueStr))
-
 	slug := encodedStr[len(encodedStr)-8:]
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

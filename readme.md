@@ -1,16 +1,40 @@
+# URL Shortening Service
+
+A URL Shortening service built in go using the go-gin framework.
+
+## Getting Started
+
+These instructions will get you a copy of the project up and running.
+
+### Prerequisites
+
+- Docker
+
+### Setup
+
+1. Clone the repo:
+```bash
+git clone https://github.com/mhope-2/url_shortner.git
+```
+
+2. Rename `.env.sample` to `.env` and update env variables accordingly
+```bash
+cp .env.sample .env
+```
+
+3. Run with docker
+
+```bash
+docker-compose up
+```
+
+## Running tests
+```bash
+go test -v ./...
+```
 
 
-[x] Slug Not Required -- Done
-[x] Add Redis Caching Layer -- Done
-[x] Add ip to cache key -- Done
-[x] Add Input Validations and a validator file (repo: api_with_go for e.g.)
-[x] Add Tests (For each file) ref: check Bubu congress-bank
-[x] Run gofmt
-[x] Proper code comments
+## Extras
+* MongoDB setup guide: https://www.mongodb.com/basics/create-database
 
-// local mongodb guide
-https://www.mongodb.com/basics/create-database
-
-Run tests
-`go test -v ./...`
 

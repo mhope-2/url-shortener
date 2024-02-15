@@ -4,17 +4,20 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 	"github.com/mhope-2/url_shortener/repository"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Handler struct {
+	DB    *mongo.Database
 	Repo  *repository.Repository
 	Cache *redis.Client
 }
 
-func New(cache *redis.Client) *Handler {
-	repo := repository.New(cache)
+func New(db *mongo.Database, cache *redis.Client) *Handler {
+	repo := repository.New(db, cache)
 
 	return &Handler{
+		DB:    db,
 		Repo:  repo,
 		Cache: cache,
 	}
