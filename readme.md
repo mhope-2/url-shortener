@@ -33,6 +33,28 @@ docker-compose up
 go test -v ./...
 ```
 
+## API  
+* Endpoint: `/short-link`  
+* Sample Requests
+```json
+{
+  "url": "https://gobyexample.com/random-numbers",
+  "slug": "NTMyODk0"
+}
+```
+```json
+{
+  "url": "https://gobyexample.com/random-numbers"
+}
+```
+* Sample Response  
+```json
+{
+    "result": {
+        "shortened_url": "http://localhost:8085/NTMyODk0"
+    }
+}
+```
 
 ## Extras
 * MongoDB setup guide: https://www.mongodb.com/basics/create-database
