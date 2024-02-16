@@ -14,7 +14,7 @@ These instructions will get you a copy of the project up and running.
 
 1. Clone the repo:
 ```bash
-git clone https://github.com/mhope-2/url_shortner.git
+git clone https://github.com/mhope-2/url-shortner.git
 ```
 
 2. Rename `.env.sample` to `.env` and update env variables accordingly
