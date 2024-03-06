@@ -1,6 +1,6 @@
 package shared
 
-type Url struct {
-	Url  string
+type URL struct {
+	URL  string
 	Slug string
 }

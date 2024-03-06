@@ -1,3 +1,4 @@
+// Package handler defines the API and DB interface
 package handler
 
 import (
@@ -25,6 +26,6 @@ func New(db *mongo.Database, cache *redis.Client) *Handler {
 
 func (h *Handler) Register(v1 *gin.RouterGroup) {
 	v1.POST("/short-link", h.CreateShortLink)
-	v1.GET("/:slug", h.RedirectToOriginalUrl)
+	v1.GET("/:slug", h.RedirectToOriginalURL)
 
 }

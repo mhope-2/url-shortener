@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/mhope-2/url_shortener/shared"
 	"log"
@@ -15,14 +14,14 @@ var (
 	UpperBound        = 1_000_000
 )
 
-type CreateShortUrlRequest struct {
-	Url  string `json:"url" validate:"required"`
+type CreateShortURLRequest struct {
+	URL  string `json:"url" validate:"required"`
 	Slug string `json:"slug,omitempty"` // optional
 }
 
 // CreateShortLink returns a shortened url
 func (h *Handler) CreateShortLink(c *gin.Context) {
-	var data CreateShortUrlRequest
+	var data CreateShortURLRequest
 	clientIP := c.ClientIP()
 
 	if err := c.ShouldBindJSON(&data); err != nil {
@@ -33,8 +32,8 @@ func (h *Handler) CreateShortLink(c *gin.Context) {
 
 	// Prefix http:// to a given url if it is without one
 	// c.Redirect(code int, location string) requires the http prefix
-	if !strings.HasPrefix(data.Url, "http://") && !strings.HasPrefix(data.Url, "https://") {
-		data.Url = "http://" + data.Url
+	if !strings.HasPrefix(data.URL, "http://") && !strings.HasPrefix(data.URL, "https://") {
+		data.URL = "http://" + data.URL
 	}
 
 	if data.Slug != "" {
@@ -44,42 +43,41 @@ func (h *Handler) CreateShortLink(c *gin.Context) {
 		}
 
 		// Check if the provided slug is available
-		existingUrl, err := h.Repo.GetUrl(data.Slug, clientIP)
+		existingURL, err := h.Repo.GetURL(data.Slug, clientIP)
 		if err != nil {
 			log.Println("Error shortening URL:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"detail": "Request failed"})
 			return
 		}
 
-		if existingUrl != nil {
+		if existingURL != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"detail": "Slug is not available, try again"})
 			return
 		}
 	}
 
 	if data.Slug == "" {
-		existingUrl, err := h.Repo.GetUrl(data.Url, clientIP)
+		existingURL, err := h.Repo.GetURL(data.URL, clientIP)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"detail": "Request failed"})
 			return
 		}
 
-		if existingUrl != nil {
-			fmt.Println("EX: ", existingUrl)
+		if existingURL != nil {
 			c.JSON(http.StatusOK, gin.H{
 				"result": gin.H{
-					"shortened_url": shared.GetShortenedUrl(existingUrl.Slug),
+					"shortened_url": shared.GetShortenedURL(existingURL.Slug),
 				},
 			})
 			return
 		}
 
-		data.Slug = h.Repo.GenerateSlug(data.Url, LowerBound, UpperBound)
+		data.Slug = h.Repo.GenerateSlug(data.URL, LowerBound, UpperBound)
 	}
 
 	c.ClientIP()
 
-	url, err := h.Repo.CreateUrl(data.Url, data.Slug, clientIP)
+	url, err := h.Repo.CreateURL(data.URL, data.Slug, clientIP)
 
 	if err != nil {
 		log.Println("Error shortening url: ", err)
@@ -92,17 +90,17 @@ func (h *Handler) CreateShortLink(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"result": gin.H{
-			"shortened_url": shared.GetShortenedUrl(url.Slug),
+			"shortened_url": shared.GetShortenedURL(url.Slug),
 		},
 	})
 }
 
-// RedirectToOriginalUrl redirects to the stored url for the given slug
-func (h *Handler) RedirectToOriginalUrl(c *gin.Context) {
+// RedirectToOriginalURL redirects to the stored url for the given slug
+func (h *Handler) RedirectToOriginalURL(c *gin.Context) {
 	slug := c.Param("slug")
 	clientIP := c.ClientIP()
 
-	url, err := h.Repo.GetUrl(slug, clientIP)
+	url, err := h.Repo.GetURL(slug, clientIP)
 
 	if err != nil {
 		log.Println("Error retrieving url: ", err)
@@ -122,6 +120,6 @@ func (h *Handler) RedirectToOriginalUrl(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusTemporaryRedirect, url.Url)
+	c.Redirect(http.StatusTemporaryRedirect, url.URL)
 	c.Abort()
 }

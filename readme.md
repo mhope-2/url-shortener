@@ -27,10 +27,18 @@ cp .env.sample .env
 ```bash
 docker-compose up
 ```
+or
+```
+make up
+```
 
 ## Running tests
 ```bash
-go test -v ./...
+go test -v -cover ./...
+```
+or
+```bash
+make test
 ```
 
 ## API  

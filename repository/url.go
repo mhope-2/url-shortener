@@ -17,35 +17,35 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type UrlRepository interface {
-	CreateUrl(originalUrl string, slug string, clientIP string) (*models.Url, error)
-	GetUrl(slug string, clientIP string) (*models.Url, error)
-	CacheUrl(url *shared.Url, clientIP string) error
-	GetUrlFromCache(cacheKey string, clientIP string) (*shared.Url, error)
+type URLRepository interface {
+	CreateUrl(originalURL string, slug string, clientIP string) (*models.URL, error)
+	GetUrl(slug string, clientIP string) (*models.URL, error)
+	CacheUrl(url *shared.URL, clientIP string) error
+	GetUrlFromCache(cacheKey string, clientIP string) (*shared.URL, error)
 	GenerateRandomNumber(min, max int) int
 	GenerateSlug(url string, min, max int) string
 }
 
 var collection = "url"
 
-// CreateUrl creates a url object, stores it in the db and the caches it
-func (r *Repository) CreateUrl(originalUrl string, slug string, clientIP string) (*models.Url, error) {
+// CreateURL creates a url object, stores it in the db and the caches it
+func (r *Repository) CreateURL(originalURL string, slug string, clientIP string) (*models.URL, error) {
 
 	urlCollection := r.DB.Collection(collection)
 
-	var url models.Url
+	var url models.URL
 
-	existingUrl, err := r.GetUrl(slug, clientIP)
+	existingURL, err := r.GetURL(slug, clientIP)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if existingUrl != nil {
-		return existingUrl, nil
+	if existingURL != nil {
+		return existingURL, nil
 	}
 
-	url = models.Url{ID: primitive.NewObjectID(), Url: originalUrl, Slug: slug, CreatedAt: time.Now()}
+	url = models.URL{ID: primitive.NewObjectID(), URL: originalURL, Slug: slug, CreatedAt: time.Now()}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -56,20 +56,20 @@ func (r *Repository) CreateUrl(originalUrl string, slug string, clientIP string)
 		return nil, err
 	}
 
-	if err = r.CacheUrl(&shared.Url{Url: url.Url, Slug: url.Slug}, clientIP); err != nil {
+	if err = r.CacheURL(&shared.URL{URL: url.URL, Slug: url.Slug}, clientIP); err != nil {
 		return nil, err
 	}
 
 	return &url, nil
 }
 
-// GetUrl returns matching url objects for the given slug
-func (r *Repository) GetUrl(slug string, clientIP string) (*models.Url, error) {
+// GetURL returns matching url objects for the given slug
+func (r *Repository) GetURL(slug string, clientIP string) (*models.URL, error) {
 
 	urlCollection := r.DB.Collection(collection)
 
 	// Attempt to get the URL from the cache
-	cachedUrl, err := r.GetUrlFromCache(slug, clientIP)
+	cachedURL, err := r.GetURLFromCache(slug, clientIP)
 	if err != nil {
 		if err == redis.Nil {
 			return nil, nil
@@ -78,11 +78,11 @@ func (r *Repository) GetUrl(slug string, clientIP string) (*models.Url, error) {
 		return nil, err
 	}
 
-	if cachedUrl != nil {
-		return &models.Url{Url: cachedUrl.Url, Slug: cachedUrl.Slug}, nil
+	if cachedURL != nil {
+		return &models.URL{URL: cachedURL.URL, Slug: cachedURL.URL}, nil
 	}
 
-	var url models.Url
+	var url models.URL
 
 	filter := bson.M{"slug": slug}
 
@@ -100,29 +100,34 @@ func (r *Repository) GetUrl(slug string, clientIP string) (*models.Url, error) {
 	return &url, nil
 }
 
-// CacheUrl caches the given url
-func (r *Repository) CacheUrl(url *shared.Url, clientIP string) error {
-	stringifiedUrl, err := json.Marshal(url)
+// CacheURL caches the given url
+func (r *Repository) CacheURL(url *shared.URL, clientIP string) error {
+	stringifiedURL, err := json.Marshal(url)
 	if err != nil {
 		return err
 	}
 
 	key := fmt.Sprintf("%s-%s", url.Slug, clientIP)
-	_, err = r.Cache.Set(key, stringifiedUrl, 0).Result()
-
-	key = fmt.Sprintf("%s-%s", url.Url, clientIP)
-	_, err = r.Cache.Set(key, stringifiedUrl, 0).Result()
+	_, err = r.Cache.Set(key, stringifiedURL, 0).Result()
 
 	if err != nil {
-		log.Printf("Error caching url: %v", err)
+		log.Printf("Error caching URL; key, slug: %v", err)
+		return err
+	}
+
+	key = fmt.Sprintf("%s-%s", url.URL, clientIP)
+	_, err = r.Cache.Set(key, stringifiedURL, 0).Result()
+
+	if err != nil {
+		log.Printf("Error caching URL; key url: %v", err)
 		return err
 	}
 	return nil
 }
 
-// GetUrlFromCache returns the url from the cache using the given slug as the key
-func (r *Repository) GetUrlFromCache(cacheKey string, clientIP string) (*shared.Url, error) {
-	var url shared.Url
+// GetURLFromCache returns the url from the cache using the given slug as the key
+func (r *Repository) GetURLFromCache(cacheKey string, clientIP string) (*shared.URL, error) {
+	var url shared.URL
 
 	key := fmt.Sprintf("%s-%s", cacheKey, clientIP)
 
@@ -150,7 +155,7 @@ func (r *Repository) GenerateSlug(url string, min, max int) string {
 
 	urlCollection := r.DB.Collection("url")
 
-	var existingURL models.Url
+	var existingURL models.URL
 
 	uniqueStr := fmt.Sprintf("%s+%d+%d", url, r.GenerateRandomNumber(min, max), time.Now().Unix())
 	encodedStr := base64.RawURLEncoding.EncodeToString([]byte(uniqueStr))

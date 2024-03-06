@@ -1,3 +1,4 @@
+// Package shared houses shared components
 package shared
 
 import (
@@ -5,6 +6,6 @@ import (
 	"os"
 )
 
-func GetShortenedUrl(slug string) string {
+func GetShortenedURL(slug string) string {
 	return fmt.Sprintf("%s/%s", os.Getenv("BASE_URL"), slug)
 }

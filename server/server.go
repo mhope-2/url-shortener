@@ -1,3 +1,4 @@
+// Package server defines the server component
 package server
 
 import (
@@ -34,7 +35,7 @@ func Start(e *Server, cfg *Config) {
 		Handler: e.Engine,
 	}
 
-	quit := make(chan os.Signal)
+	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 
 	go func() {

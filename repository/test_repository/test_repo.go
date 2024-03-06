@@ -1,4 +1,5 @@
-package test_repository
+// Package testrepository defines a repository to used for testing
+package testrepository
 
 import (
 	"github.com/alicebob/miniredis/v2"

@@ -1,3 +1,4 @@
+// Package redis defines the redis connection component
 package redis
 
 import (

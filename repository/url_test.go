@@ -44,28 +44,28 @@ func TestUrlRepo(t *testing.T) {
 func crud(t *testing.T) {
 	assert.Equal(t, 1, 1)
 
-	repo := test_repository.NewRepo()
+	repo := testrepository.NewRepo()
 
 	// test repo create url with slug
-	url, err := repo.CreateUrl("https://youtube.com/", "A1B2C3D4", "127.0.0.1")
+	url, err := repo.CreateURL("https://youtube.com/", "A1B2C3D4", "127.0.0.1")
 	if err != nil {
 		t.Fatalf("Error creating url: %v", err)
 	}
 
 	assert.NoError(t, err, "Failed to create url")
-	assert.Equal(t, url.Url, "https://youtube.com/")
+	assert.Equal(t, url.URL, "https://youtube.com/")
 	assert.Equal(t, url.Slug, "A1B2C3D4")
 
 	// ------------------------------------------------------------------------
 
 	// test repo url retrieve
-	url, err = repo.GetUrl("A1B2C3D4", "127.0.0.1")
+	url, err = repo.GetURL("A1B2C3D4", "127.0.0.1")
 	if err != nil {
 		t.Fatalf("Error retriving url: %v", err)
 	}
 
 	assert.NoError(t, err, "Failed to retrieve url")
-	assert.Equal(t, url.Url, "https://youtube.com/")
+	assert.Equal(t, url.URL, "https://youtube.com/")
 	assert.Equal(t, url.Slug, "A1B2C3D4")
 }
 
@@ -73,7 +73,7 @@ func crud(t *testing.T) {
 
 func slug(t *testing.T) {
 
-	repo := test_repository.NewRepo()
+	repo := testrepository.NewRepo()
 
 	// test repo generate slug
 	slug1 := repo.GenerateSlug("https://go.dev/", 25, 10_000)

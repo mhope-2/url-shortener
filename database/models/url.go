@@ -1,3 +1,4 @@
+// Package models maintains db table field types
 package models
 
 import (
@@ -5,9 +6,9 @@ import (
 	"time"
 )
 
-type Url struct {
+type URL struct {
 	ID        primitive.ObjectID `bson:"_id"`
-	Url       string             `json:"url" validate:"required,"`
+	URL       string             `json:"url" validate:"required,"`
 	Slug      string             `json:"slug" validate:"required"`
 	CreatedAt time.Time          `json:"created_at" bson:"created_at"`
 }
